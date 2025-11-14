@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(oop_lab5)
+project(lab5_allocators)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,11 +15,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 # Основная программа
-add_executable(oop_lab5 
+add_executable(lab5_allocators
     main.cpp
     src/memory_resource.cpp
 )
-target_include_directories(oop_lab5 PRIVATE include)
+target_include_directories(lab5_allocators PRIVATE include)
 
 # Тесты
 add_executable(tests 
@@ -27,6 +27,7 @@ add_executable(tests
     tests/iterator_test.cpp
     tests/memory_resource_test.cpp
     tests/dyn_array_test.cpp
+    src/memory_resource.cpp 
 )
 target_include_directories(tests PRIVATE include)
 target_link_libraries(tests gtest gtest_main)

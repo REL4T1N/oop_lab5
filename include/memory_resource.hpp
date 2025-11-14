@@ -4,7 +4,7 @@
 #include <memory>
 #include <iostream>
 #include <memory_resource>
-#include <algorithm>    // зачем??
+#include <algorithm>
 
 
 class VectorMemoryResource : public std::pmr::memory_resource {

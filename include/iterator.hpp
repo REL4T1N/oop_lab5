@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <cstddef>
 #include <memory>
 #include <iterator>
 
@@ -8,9 +7,6 @@
 template<typename T>
 class DynArrayIterator {
 private:
-    // T* _ptr;
-    // size_t _index;
-    // size_t _capacity;
     T* _current;
 
 public:
@@ -20,12 +16,10 @@ public:
     using pointer = T*;
     using reference = T&;
 
-
-    // DynArrayIterator(T* ptr, size_t index, size_t capacity) : _ptr(ptr), _index(index), _capacity(capacity) {}
     DynArrayIterator(T* ptr) : _current(ptr) {}
 
-    reference operator*() const {return *_current;} //{return _ptr[_index];}
-    pointer operator->() const {return _current;}   //{return &_ptr[_index];}
+    reference operator*() const {return *_current;} 
+    pointer operator->() const {return _current;}   
 
     
     DynArrayIterator& operator++();    // prefix - возвращает ссылку на уже измененный объект

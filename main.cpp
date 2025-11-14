@@ -1,83 +1,112 @@
 #include <iostream>
-#include "./include/memory_resource.hpp"
-#include "./include/dyn_array.hpp"
+#include <string>
+#include "../include/dyn_array.hpp"
+#include "../include/memory_resource.hpp"
 
-struct ComplexType {
-    int id;
-    double value;
+// Сложный тип для демонстрации
+struct Person {
     std::string name;
-
-    ComplexType(int id = 0, double value = 0.0, const std::string& name = "") 
-        : id(id), value(value), name(name) {}
+    int age;
+    double salary;
+    
+    Person(const std::string& n = "", int a = 0, double s = 0.0) 
+        : name(n), age(a), salary(s) {}
+    
+    friend std::ostream& operator<<(std::ostream& os, const Person& p) {
+        os << "Person{name: \"" << p.name << "\", age: " << p.age 
+           << ", salary: " << p.salary << "}";
+        return os;
+    }
 };
 
-int main() {
+void demo_simple_types() {
+    std::cout << "=== Демонстрация с простыми типами (int) ===" << std::endl;
+    
+    VectorMemoryResource resource;
+    std::pmr::polymorphic_allocator<int> alloc(&resource);
+    
+    DynArray<int> numbers(alloc);
+    
+    for (int i = 0; i < 10; ++i) {
+        numbers.push_back(i * i);
+    }
+    
+    // вывод через итератор
+    std::cout << "Numbers: ";
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+    
+    // вывод через range-based for
+    std::cout << "Range-based for: ";
+    for (int num : numbers) {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+    
+    resource.print_stats();
+}
+
+void demo_complex_types() {
+    std::cout << "\n=== Демонстрация со сложными типами (Person) ===" << std::endl;
+    
+    VectorMemoryResource resource;
+    std::pmr::polymorphic_allocator<Person> alloc(&resource);
+    
+    DynArray<Person> people(alloc);
+    
+    people.push_back(Person("Alice", 30, 50000.0));
+    people.push_back(Person("Bob", 25, 45000.0));
+    people.push_back(Person("Charlie", 35, 60000.0));
+    
+    std::cout << "People:" << std::endl;
+    for (auto it = people.begin(); it != people.end(); ++it) {
+        std::cout << "  " << *it << std::endl;
+    }
+    
+    // доступ по индексу
+    std::cout << "Second person: " << people[1] << std::endl;
+    
+    resource.print_stats();
+}
+
+void demo_memory_reuse() {
+    std::cout << "\n=== Демонстрация переиспользования памяти ===" << std::endl;
+    
     VectorMemoryResource resource;
     
-    // Демонстрация с простыми типами (int)
     {
-        std::cout << "=== Demonstration with int ===" << std::endl;
         std::pmr::polymorphic_allocator<int> alloc(&resource);
-        DynArray<int> arr(alloc);
+        DynArray<int> temp(alloc);
         
         for (int i = 0; i < 5; ++i) {
-            arr.push_back(i * 10);
+            temp.push_back(i);
         }
         
-        std::cout << "Array: ";
-        for (auto it = arr.begin(); it != arr.end(); ++it) {
-            std::cout << *it << " ";
-        }
-        std::cout << std::endl;
-        
+        std::cout << "До очистки - ";
         resource.print_stats();
+    }   // temp выходит из области видимости, память освобождается
+    
+    std::cout << "После очистки - ";
+    resource.print_stats();
+    
+    // новый массив, который должен переиспользовать память
+    std::pmr::polymorphic_allocator<int> alloc(&resource);
+    DynArray<int> new_array(alloc);
+    
+    for (int i = 0; i < 3; ++i) {
+        new_array.push_back(i * 10);
     }
     
-    // Демонстрация со сложными типами
-    {
-        std::cout << "\n=== Demonstration with ComplexType ===" << std::endl;
-        std::pmr::polymorphic_allocator<ComplexType> alloc(&resource);
-        DynArray<ComplexType> arr(alloc);
-        
-        arr.push_back(ComplexType(1, 3.14, "Pi"));
-        arr.push_back(ComplexType(2, 2.71, "E"));
-        arr.push_back(ComplexType(3, 1.41, "sqrt(2)"));
-        
-        std::cout << "Complex array:\n";
-        for (const auto& item : arr) {
-            std::cout << "  id: " << item.id << ", value: " << item.value 
-                      << ", name: " << item.name << std::endl;
-        }
-        
-        resource.print_stats();
-    }
-    
-    // Демонстрация переиспользования памяти
-    {
-        std::cout << "\n=== Memory Reuse Demonstration ===" << std::endl;
-        std::pmr::polymorphic_allocator<int> alloc(&resource);
-        
-        // Создаем и удаляем несколько массивов
-        DynArray<int>* arr1 = new DynArray<int>(alloc);
-        for (int i = 0; i < 3; ++i) {
-            arr1->push_back(i);
-        }
-        delete arr1;
-        
-        // Новый массив должен переиспользовать память
-        DynArray<int> arr2(alloc);
-        for (int i = 10; i < 13; ++i) {
-            arr2.push_back(i);
-        }
-        
-        std::cout << "Reused memory array: ";
-        for (auto val : arr2) {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
-        
-        resource.print_stats();
-    }
+    std::cout << "После переиспользования - ";
+    resource.print_stats();
+}
+
+int main() {
+    demo_simple_types();
+    demo_complex_types();
+    demo_memory_reuse();
     
     return 0;
 }

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../include/memory_resource.hpp"
 
+
 TEST(MemoryResourceTest, BasicAllocation) {
     VectorMemoryResource resource;
     std::pmr::polymorphic_allocator<int> alloc(&resource);
@@ -9,6 +10,7 @@ TEST(MemoryResourceTest, BasicAllocation) {
     EXPECT_NE(ptr, nullptr);
     alloc.deallocate(ptr, 1);
 }
+
 
 TEST(MemoryResourceTest, MemoryReuse) {
     VectorMemoryResource resource;
@@ -22,6 +24,7 @@ TEST(MemoryResourceTest, MemoryReuse) {
     EXPECT_EQ(ptr1, ptr2);
     alloc.deallocate(ptr2, 1);
 }
+
 
 TEST(MemoryResourceTest, Stats) {
     VectorMemoryResource resource;

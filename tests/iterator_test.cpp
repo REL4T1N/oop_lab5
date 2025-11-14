@@ -2,6 +2,7 @@
 #include "../include/iterator.hpp"
 #include "../include/dyn_array.hpp"
 
+
 TEST(IteratorTest, BasicIteration) {
     DynArray<int> arr;
     arr.push_back(1);
@@ -14,6 +15,7 @@ TEST(IteratorTest, BasicIteration) {
     }
     EXPECT_EQ(sum, 6);
 }
+
 
 TEST(IteratorTest, RangeBasedFor) {
     DynArray<int> arr;

@@ -7,13 +7,10 @@ VectorMemoryResource::VectorMemoryResource(std::pmr::memory_resource* upstream) 
 
 VectorMemoryResource::~VectorMemoryResource() {
     for (const auto& alloc : _allocations) {
+        if (alloc.in_use) {
+            std::cout << "WARNING: Block still in use at desctruction: " << alloc.size << " bytes at " << alloc.ptr << std::endl;
+        }
         _upstream->deallocate(alloc.ptr, alloc.size, alloc.alignment);
-        std::cout << "[VectorMemoryResource] Cleaned up: " << alloc.size << " bytes at " << alloc.ptr << std::endl;
-    }
-
-    size_t leaked = used_blocks();
-    if (leaked > 0) {
-        std::cout << "WARNING: " << leaked << " blocks still in use" << std::endl;
     }
 }
 
@@ -22,15 +19,13 @@ void* VectorMemoryResource::do_allocate(size_t bytes, size_t alignment) {
     for (auto& alloc : _allocations) {
         if (!alloc.in_use && alloc.size >= bytes && alloc.alignment >= alignment) {
             alloc.in_use = true;
-            std::cout << "[Memory] Reused " << bytes << " bytes\n";  // 👈 только факт переиспользования
+            std::cout << "[Memory] Reused " << bytes << " bytes\n";
             return alloc.ptr;
         }
     }
 
     void* ptr = _upstream->allocate(bytes, alignment);
     _allocations.emplace_back(ptr, bytes, alignment);
-
-    // std::cout << "[VectorMemoryResource] New allocation: " << bytes << " bytes at " << ptr << " (alignment " << alignment << ")" << std::endl;
     return ptr;
 }
 
@@ -41,7 +36,6 @@ void VectorMemoryResource::do_deallocate(void* p, size_t bytes, size_t alignment
                 throw std::logic_error("Double deallocation detected");
             }
             alloc.in_use = false;
-            // std::cout << "[VectorMemoryResource] Marked as free: " << alloc.size << " bytes at " << p << std::endl;
             return;
         }
     }
