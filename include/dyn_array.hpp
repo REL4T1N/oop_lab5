@@ -68,10 +68,10 @@ void DynArray<T>::cleanup() {
 
 
 template<class T>
-DynArray<T>::DynArray(std::pmr::polymorphic_allocator<T> alloc = {}) : _allocator(alloc), _data(nullptr), _size(0), _capacity(0) {}
+DynArray<T>::DynArray(std::pmr::polymorphic_allocator<T> alloc) : _allocator(alloc), _data(nullptr), _size(0), _capacity(0) {}
 
 template<class T>
-DynArray<T>::DynArray(size_t capacity, std::pmr::polymorphic_allocator<T> alloc = {}) 
+DynArray<T>::DynArray(size_t capacity, std::pmr::polymorphic_allocator<T> alloc) 
     : _allocator(alloc), _data(nullptr), _size(0), _capacity(0) {
     if (capacity > 0) {
         reserve(capacity);
